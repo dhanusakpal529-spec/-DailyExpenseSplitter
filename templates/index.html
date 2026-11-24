@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Daily Expense Splitter</title>
+
+    <style>
+        :root {
+            --navy-dark: #151F38;
+            --navy-primary: #1D2B4C;
+            --navy-border: #2F4373;
+
+            --accent-gold: #FCE19C;
+            --accent-gold-hover: #F7D174;
+            --accent-text: #151F38;
+
+            --background: #F5F7FA;
+            --white: #FFFFFF;
+            --text: #1E293B;
+            --muted: #64748B;
+            --border: #E2E8F0;
+
+            --green: #059669;
+            --red: #E11D48;
+            --shadow: 0 18px 40px rgba(21, 31, 56, 0.10);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top right, rgba(252, 225, 156, 0.25), transparent 35%),
+                var(--background);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* MAIN CARD */
+        .container {
+            width: 420px;
+            max-width: 100%;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        /* NAVY TOP HEADER */
+        .card-header {
+            background: linear-gradient(135deg, var(--navy-primary), var(--navy-dark));
+            padding: 30px 28px 26px;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .logo-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--navy-border);
+            color: var(--accent-gold);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
+
+        .card-header h1 {
+            font-size: 24px;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+
+        .card-header p {
+            font-size: 13px;
+            color: #CBD5E1;
+        }
+
+        /* TABS */
+        .tab-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: rgba(21, 31, 56, 0.65);
+            padding: 5px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid var(--navy-border);
+        }
+
+        .tab-btn {
+            padding: 9px;
+            border: none;
+            border-radius: 9px;
+            background: transparent;
+            color: #CBD5E1;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-gold);
+            color: var(--accent-text);
+        }
+
+        /* FORM AREA */
+        .form-body {
+            padding: 28px 30px 32px;
+        }
+
+        .input-wrap {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--background);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--navy-primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(29, 43, 76, 0.1);
+        }
+
+        .eye-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .eye-btn:hover {
+            color: var(--navy-primary);
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: 13px;
+            margin-top: 6px;
+            border: none;
+            border-radius: 12px;
+            background: var(--navy-primary);
+            color: var(--accent-gold);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .main-btn:hover {
+            background: var(--navy-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(21, 31, 56, 0.18);
+        }
+
+        #registerBox {
+            display: none;
+        }
+
+        #loginMessage,
+        #registerMessage {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 14px;
+            min-height: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- NAVY HEADER + TABS -->
+        <div class="card-header">
+            <div class="logo-badge">✦ EXPENSE SPLITTER</div>
+            <h1 id="headerTitle">Welcome Back</h1>
+            <p id="headerSubtitle">Sign in to manage your group expenses</p>
+
+            <div class="tab-bar">
+                <button type="button" id="loginTab" class="tab-btn active" onclick="showTab('login')">
+                    Sign In
+                </button>
+                <button type="button" id="registerTab" class="tab-btn" onclick="showTab('register')">
+                    Register
+                </button>
+            </div>
+        </div>
+
+        <!-- FORMS -->
+        <div class="form-body">
+
+            <!-- LOGIN FORM -->
+            <div id="loginBox">
+                <form onsubmit="loginUser(event)">
+                    <div class="input-wrap">
+                        <input type="email" id="loginEmail" placeholder="Email address" required>
+                    </div>
+
+                    <div class="input-wrap">
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                        <button type="button" class="eye-btn" onclick="togglePass('loginPassword', this)">Show</button>
+                    </div>
+
+                    <button type="submit" class="main-btn">Sign In →</button>
+                </form>
+                <p id="loginMessage"></p>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div id="registerBox">
+                <form onsubmit="registerUser(event)">
+                    <div class="input-wrap">
+                        <input type="text" id="registerName" placeholder="Full name" required>
+                    </div>
+
+                    <div class="input-wrap">
+                        <input type="email" id="registerEmail" placeholder="Email address" required>
+                    </div>
+
+                    <div class="input-wrap">
+                        <input type="password" id="registerPassword" placeholder="Create password" required>
+                        <button type="button" class="eye-btn" onclick="togglePass('registerPassword', this)">Show</button>
+                    </div>
+
+                    <button type="submit" class="main-btn">Create Account →</button>
+                </form>
+                <p id="registerMessage"></p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            const isRegister = tab === "register";
+
+            document.getElementById("loginBox").style.display = isRegister ? "none" : "block";
+            document.getElementById("registerBox").style.display = isRegister ? "block" : "none";
+
+            document.getElementById("loginTab").classList.toggle("active", !isRegister);
+            document.getElementById("registerTab").classList.toggle("active", isRegister);
+
+            document.getElementById("headerTitle").textContent =
+                isRegister ? "Create Account" : "Welcome Back";
+            document.getElementById("headerSubtitle").textContent =
+                isRegister ? "Start splitting bills easily with friends" : "Sign in to manage your group expenses";
+        }
+
+        function togglePass(id, btn) {
+            const input = document.getElementById(id);
+            const hide = input.type === "password";
+            input.type = hide ? "text" : "password";
+            btn.textContent = hide ? "Hide" : "Show";
+        }
+
+        async function loginUser(e) {
+            e.preventDefault();
+            const msg = document.getElementById("loginMessage");
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
+
+            msg.style.color = "#64748B";
+            msg.textContent = "Signing in...";
+
+            try {
+                const res = await fetch("/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    msg.style.color = "#E11D48";
+                    msg.textContent = data.message || "Invalid login";
+                    return;
+                }
+
+                localStorage.setItem("user", JSON.stringify({
+                    id: data.user_id,
+                    name: data.name,
+                    email
+                }));
+
+                msg.style.color = "#059669";
+                msg.textContent = "Login successful!";
+                window.location.href = "/dashboard";
+            } catch {
+                msg.style.color = "#E11D48";
+                msg.textContent = "Unable to connect to server.";
+            }
+        }
+
+        async function registerUser(e) {
+            e.preventDefault();
+            const msg = document.getElementById("registerMessage");
+            const name = document.getElementById("registerName").value.trim();
+            const email = document.getElementById("registerEmail").value.trim();
+            const password = document.getElementById("registerPassword").value;
+
+            msg.style.color = "#64748B";
+            msg.textContent = "Creating account...";
+
+            try {
+                const res = await fetch("/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    msg.style.color = "#E11D48";
+                    msg.textContent = data.message || "Registration failed";
+                    return;
+                }
+
+                msg.style.color = "#059669";
+                msg.textContent = "Account created! Please sign in.";
+                showTab("login");
+                document.getElementById("loginEmail").value = email;
+            } catch {
+                msg.style.color = "#E11D48";
+                msg.textContent = "Unable to connect to server.";
+            }
+        }
+    </script>
+</body>
+
+</html>

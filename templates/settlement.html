@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Settlement - Daily Expense Splitter</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+
+    <style>
+        /* =========================================
+           SETTLEMENT PAGE - FINLYTICS THEME
+           (Navy, Off-White & Gold)
+        ========================================= */
+
+        body {
+            background: #F5F7FA;
+            color: #1E293B;
+        }
+
+        nav {
+            max-width: 850px;
+            margin: 28px auto 0;
+            padding: 0 20px;
+        }
+
+        .back-button {
+            padding: 10px 18px;
+            border: 1px solid #E2E8F0;
+            border-radius: 999px;
+            cursor: pointer;
+            background: #FFFFFF;
+            color: #1D2B4C;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(21, 31, 56, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: #1D2B4C;
+            color: #FCE19C;
+            border-color: #1D2B4C;
+            transform: translateY(-1px);
+        }
+
+        .settlement-container {
+            max-width: 850px;
+            margin: 20px auto 50px;
+            padding: 0 20px;
+        }
+
+        .settlement-container > h1 {
+            color: #1D2B4C;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .settlement-container > p {
+            color: #64748B;
+            font-size: 14px;
+            margin-bottom: 22px;
+        }
+
+        #settlementList {
+            color: #64748B;
+            font-size: 15px;
+        }
+
+        .settlement-card {
+            background: #1D2B4C;
+            padding: 22px 24px;
+            margin: 16px 0;
+            border-radius: 18px;
+            border: 1px solid #2F4373;
+            box-shadow: 0 12px 24px rgba(21, 31, 56, 0.14);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .settlement-card:hover {
+            transform: translateY(-3px);
+            border-color: #FCE19C;
+        }
+
+        .settlement-card h3 {
+            margin-bottom: 8px;
+            color: #FFFFFF;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .settlement-amount {
+            font-size: 24px;
+            font-weight: 800;
+            color: #FCE19C;
+            margin: 4px 0 0;
+        }
+
+        .pay-button {
+            background: #FCE19C;
+            color: #151F38;
+            border: none;
+            padding: 11px 22px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 14px;
+            margin-left: 0;
+            transition: all 0.2s ease;
+        }
+
+        .pay-button:hover {
+            background: #F7D174;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(252, 225, 156, 0.25);
+        }
+
+        /* PAYMENT MODAL */
+
+        .payment-modal {
+            display: none;
+            position: fixed;
+            z-index: 99999;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            pointer-events: auto !important;
+        }
+
+        .payment-box {
+            position: relative;
+            z-index: 100000;
+            background: #1D2B4C;
+            width: 100%;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 26px;
+            border-radius: 20px;
+            box-sizing: border-box;
+            border: 1px solid #2F4373;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+            pointer-events: auto !important;
+        }
+
+        .payment-box h2 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #FCE19C;
+            font-size: 22px;
+        }
+
+        .payment-box h3 {
+            color: #FFFFFF;
+            font-size: 16px;
+            margin-top: 14px;
+            margin-bottom: 6px;
+        }
+
+        .payment-box p {
+            color: #CBD5E1;
+            font-size: 14px;
+        }
+
+        #paymentAmount {
+            color: #FCE19C;
+            font-size: 22px;
+            font-weight: 800;
+            margin: 6px 0 16px;
+        }
+
+        .payment-box label {
+            display: block;
+            color: #E2E8F0;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .payment-box input {
+            width: 100%;
+            padding: 12px 14px;
+            margin: 6px 0 12px;
+            border: 1px solid #2F4373;
+            border-radius: 11px;
+            background: #151F38;
+            color: #FFFFFF;
+            box-sizing: border-box;
+            outline: none;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .payment-box input::placeholder {
+            color: #94A3B8;
+        }
+
+        .payment-box input:focus {
+            border-color: #FCE19C;
+            box-shadow: 0 0 0 3px rgba(252, 225, 156, 0.16);
+        }
+
+        .app-button {
+            display: block;
+            position: relative;
+            z-index: 100001;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            margin-left: 0;
+            border: none;
+            border-radius: 11px;
+            background: #FCE19C;
+            color: #151F38;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            pointer-events: auto !important;
+        }
+
+        .app-button:hover {
+            background: #F7D174;
+            transform: translateY(-1px);
+        }
+
+        /* ALL UPI APP BUTTONS */
+
+        .gpay,
+        .phonepe,
+        .paytm,
+        .other {
+            background: #223257;
+            color: #FFFFFF;
+            border: 1px solid #2F4373;
+        }
+
+        .gpay:hover,
+        .phonepe:hover,
+        .paytm:hover,
+        .other:hover {
+            background: #FCE19C;
+            color: #151F38;
+            border-color: #FCE19C;
+        }
+
+        /* CANCEL BUTTON */
+
+        .cancel-button {
+            display: block;
+            width: 100%;
+            padding: 11px;
+            margin-top: 12px;
+            margin-left: 0;
+            background: rgba(255, 255, 255, 0.07);
+            color: #CBD5E1;
+            border: 1px solid #2F4373;
+            border-radius: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            pointer-events: auto !important;
+        }
+
+        .cancel-button:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: #FFFFFF;
+        }
+
+        /* PAYMENT NOTE */
+
+        .payment-note {
+            font-size: 12px;
+            color: #94A3B8;
+            margin-top: 14px;
+            line-height: 1.5;
+        }
+
+        /* QR CODE */
+
+        #qrContainer {
+            background: #151F38;
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid #2F4373;
+        }
+
+        #qrContainer h3 {
+            color: #FCE19C;
+            margin-top: 0;
+        }
+
+        #qrcode {
+            background: #FFFFFF;
+            padding: 10px;
+            border-radius: 12px;
+            width: fit-content;
+            margin: 14px auto !important;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+
+    <nav>
+        <button type="button" class="back-button" onclick="goBack()">
+            ← Back to Group
+        </button>
+    </nav>
+
+    <!-- SETTLEMENT SECTION -->
+
+    <div class="settlement-container">
+
+        <h1>💸 Settle Up</h1>
+
+        <p>
+            Check who owes money and pay your group members easily.
+        </p>
+
+        <div id="settlementList">
+            Loading settlements...
+        </div>
+
+    </div>
+
+    <!-- PAYMENT POPUP -->
+
+    <div id="paymentModal" class="payment-modal">
+
+        <div class="payment-box">
+
+            <h2>💳 Make Payment</h2>
+
+            <p id="receiverName"></p>
+
+            <h3 id="paymentAmount"></h3>
+
+            <label for="receiverUpi">Receiver UPI ID</label>
+
+            <input
+                type="text"
+                id="receiverUpi"
+                placeholder="example@okaxis"
+                autocomplete="off"
+            >
+
+            <button
+                type="button"
+                class="app-button other"
+                onclick="generateUPIQR()">
+                📷 Show QR Code
+            </button>
+
+            <div
+                id="qrContainer"
+                style="display:none; text-align:center; margin-top:20px;">
+
+                <h3>Scan to Pay</h3>
+
+                <div
+                    id="qrcode"
+                    style="display:flex; justify-content:center; margin:15px;">
+                </div>
+
+                <p>Scan this QR code using your UPI app.</p>
+
+            </div>
+
+            <h3>Select Payment App</h3>
+
+            <button
+                type="button"
+                class="app-button gpay"
+                onclick="openUPIApp('gpay')">
+                Google Pay
+            </button>
+
+            <button
+                type="button"
+                class="app-button phonepe"
+                onclick="openUPIApp('phonepe')">
+                PhonePe
+            </button>
+
+            <button
+                type="button"
+                class="app-button paytm"
+                onclick="openUPIApp('paytm')">
+                Paytm
+            </button>
+
+            <button
+                type="button"
+                class="app-button other"
+                onclick="openUPIApp('other')">
+                Other UPI App
+            </button>
+
+            <p class="payment-note">
+                Payment will open in a supported UPI application.
+                Check the receiver's UPI ID and amount before approving.
+            </p>
+
+            <button
+                type="button"
+                class="cancel-button"
+                onclick="closePaymentModal()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+<script>
+
+// ==========================================
+// CURRENT USER AND GROUP
+// ==========================================
+
+const groupId = window.location.pathname.split("/").pop();
+
+const currentUser = JSON.parse(
+    localStorage.getItem("user") || "null"
+);
+
+let selectedReceiver = "";
+let selectedReceiverId = null;
+let selectedAmount = 0;
+
+let paymentRecordPromise = null;
+
+
+// ==========================================
+// BACK TO GROUP
+// ==========================================
+
+function goBack() {
+    window.location.href = `/group/${groupId}`;
+}
+
+
+// ==========================================
+// OPEN PAYMENT POPUP
+// ==========================================
+
+function openPaymentModal(receiverId, receiver, amount) {
+
+    selectedReceiverId = Number(receiverId);
+    selectedReceiver = receiver;
+    selectedAmount = Number(amount);
+
+    paymentRecordPromise = null;
+
+    document.getElementById("receiverName").textContent =
+        "Paying to: " + receiver;
+
+    document.getElementById("paymentAmount").textContent =
+        "Amount: ₹" + selectedAmount.toFixed(2);
+
+    document.getElementById("receiverUpi").value = "";
+
+    document.getElementById("qrContainer").style.display = "none";
+
+    document.getElementById("qrcode").innerHTML = "";
+
+    document.getElementById("paymentModal").style.display = "flex";
+}
+
+
+// ==========================================
+// CLOSE PAYMENT POPUP
+// ==========================================
+
+function closePaymentModal() {
+
+    document.getElementById("paymentModal").style.display = "none";
+
+}
+
+
+// ==========================================
+// VALIDATE UPI DETAILS
+// ==========================================
+
+function getValidUPIDetails() {
+
+    const upiId = document.getElementById("receiverUpi")
+        .value.trim();
+
+    const upiPattern =
+        /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$/;
+
+    if (!upiId) {
+        alert("Please enter receiver UPI ID.");
+        return null;
+    }
+
+    if (!upiPattern.test(upiId)) {
+        alert("Please enter a valid UPI ID.");
+        return null;
+    }
+
+    if (
+        !currentUser ||
+        !currentUser.id ||
+        !selectedReceiverId ||
+        !selectedReceiver ||
+        selectedAmount <= 0
+    ) {
+        alert("Payment details are missing. Please try again.");
+        return null;
+    }
+
+    return upiId;
+}
+
+
+// ==========================================
+// SAVE PAYMENT IN SQLITE DATABASE
+// ==========================================
+
+async function recordPayment() {
+
+    if (paymentRecordPromise) {
+        return paymentRecordPromise;
+    }
+
+    paymentRecordPromise = (async function () {
+
+        const response = await fetch(
+            `/groups/${groupId}/payments`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    paid_by: Number(currentUser.id),
+
+                    paid_to: selectedReceiverId,
+
+                    amount: selectedAmount,
+
+                    payment_method: "UPI",
+
+                    transaction_id: null
+
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message || "Unable to record payment."
+            );
+
+        }
+
+        console.log("Payment recorded:", data);
+
+        return data.payment_id;
+
+    })();
+
+    try {
+
+        return await paymentRecordPromise;
+
+    } catch (error) {
+
+        paymentRecordPromise = null;
+
+        throw error;
+
+    }
+
+}
+
+
+// ==========================================
+// OPEN SELECTED UPI APP
+// ==========================================
+
+async function openUPIApp(app) {
+
+    const upiId = getValidUPIDetails();
+
+    if (!upiId) {
+        return;
+    }
+
+    try {
+
+        // Save payment as PENDING first
+
+        await recordPayment();
+
+        const params = new URLSearchParams({
+
+            pa: upiId,
+
+            pn: selectedReceiver,
+
+            am: selectedAmount.toFixed(2),
+
+            cu: "INR",
+
+            tn: "Daily Expense Splitter"
+
+        });
+
+        let paymentLink = `upi://pay?${params.toString()}`;
+
+        if (app === "gpay") {
+
+            paymentLink = `tez://upi/pay?${params.toString()}`;
+
+        }
+
+        else if (app === "phonepe") {
+
+            paymentLink = `phonepe://pay?${params.toString()}`;
+
+        }
+
+        else if (app === "paytm") {
+
+            paymentLink = `paytmmp://pay?${params.toString()}`;
+
+        }
+
+        // Open payment app
+
+        window.location.href = paymentLink;
+
+    } catch (error) {
+
+        console.error("Payment error:", error);
+
+        alert(error.message);
+
+    }
+
+}
+
+
+// ==========================================
+// GENERATE UPI QR CODE
+// ==========================================
+
+async function generateUPIQR() {
+
+    const upiId = getValidUPIDetails();
+
+    if (!upiId) {
+        return;
+    }
+
+    if (typeof QRCode === "undefined") {
+
+        alert("QR Code library not loaded. Check your internet connection.");
+
+        return;
+
+    }
+
+    try {
+
+        // Save payment as PENDING
+
+        await recordPayment();
+
+        const params = new URLSearchParams({
+
+            pa: upiId,
+
+            pn: selectedReceiver,
+
+            am: selectedAmount.toFixed(2),
+
+            cu: "INR",
+
+            tn: "Daily Expense Splitter"
+
+        });
+
+        const paymentLink = `upi://pay?${params.toString()}`;
+
+        const qrElement = document.getElementById("qrcode");
+
+        qrElement.innerHTML = "";
+
+        document.getElementById("qrContainer").style.display = "block";
+
+        new QRCode(qrElement, {
+
+            text: paymentLink,
+
+            width: 220,
+
+            height: 220,
+
+            correctLevel: QRCode.CorrectLevel.M
+
+        });
+
+    } catch (error) {
+
+        console.error("QR payment error:", error);
+
+        alert(error.message);
+
+    }
+
+}
+
+
+// ==========================================
+// CALCULATE SETTLEMENTS
+// ==========================================
+
+function calculateSettlements(balances) {
+
+    let debtors = balances
+
+        .filter(member => member.balance < -0.01)
+
+        .map(member => ({
+
+            ...member,
+
+            remaining: Math.round(
+                Math.abs(member.balance) * 100
+            )
+
+        }));
+
+
+    let creditors = balances
+
+        .filter(member => member.balance > 0.01)
+
+        .map(member => ({
+
+            ...member,
+
+            remaining: Math.round(
+                member.balance * 100
+            )
+
+        }));
+
+
+    let settlements = [];
+
+    let i = 0;
+    let j = 0;
+
+
+    while (
+        i < debtors.length &&
+        j < creditors.length
+    ) {
+
+        const amount = Math.min(
+
+            debtors[i].remaining,
+
+            creditors[j].remaining
+
+        );
+
+
+        if (amount > 0) {
+
+            settlements.push({
+
+                debtor: debtors[i],
+
+                creditor: creditors[j],
+
+                amount: amount / 100
+
+            });
+
+        }
+
+
+        debtors[i].remaining -= amount;
+
+        creditors[j].remaining -= amount;
+
+
+        if (debtors[i].remaining === 0) {
+            i++;
+        }
+
+
+        if (creditors[j].remaining === 0) {
+            j++;
+        }
+
+    }
+
+
+    return settlements;
+
+}
+
+
+// ==========================================
+// LOAD SETTLEMENTS
+// ==========================================
+
+async function loadSettlement() {
+
+    const container =
+        document.getElementById("settlementList");
+
+
+    if (!currentUser) {
+
+        container.textContent = "Please login again.";
+
+        return;
+
+    }
+
+
+    try {
+
+        const response = await fetch(
+            `/groups/${groupId}/balances`
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            container.textContent =
+                data.message || "Unable to load balances.";
+
+            return;
+
+        }
+
+
+        const settlements =
+            calculateSettlements(data.balances);
+
+
+        container.innerHTML = "";
+
+
+        if (settlements.length === 0) {
+
+            container.textContent =
+                "🎉 Everyone is settled!";
+
+            return;
+
+        }
+
+
+        settlements.forEach(item => {
+
+            const debtor = item.debtor;
+
+            const creditor = item.creditor;
+
+            const amount = item.amount;
+
+
+            const card = document.createElement("div");
+
+            card.className = "settlement-card";
+
+
+            const heading = document.createElement("h3");
+
+            heading.textContent =
+                `${debtor.name} pays ${creditor.name}`;
+
+
+            const amountText = document.createElement("p");
+
+            amountText.className = "settlement-amount";
+
+            amountText.textContent =
+                `₹${amount.toFixed(2)}`;
+
+
+            card.appendChild(heading);
+
+            card.appendChild(amountText);
+
+
+            // SHOW PAY BUTTON TO DEBTOR
+
+            if (
+                Number(debtor.user_id) ===
+                Number(currentUser.id)
+            ) {
+
+                const payButton =
+                    document.createElement("button");
+
+                payButton.type = "button";
+
+                payButton.className = "pay-button";
+
+                payButton.textContent = "💳 Pay Now";
+
+
+                payButton.addEventListener("click", function () {
+
+                    openPaymentModal(
+                        creditor.user_id,
+                        creditor.name,
+                        amount
+                    );
+
+                });
+
+
+                card.appendChild(payButton);
+
+            }
+
+
+            container.appendChild(card);
+
+        });
+
+
+    } catch (error) {
+
+        console.error("Settlement error:", error);
+
+        container.textContent =
+            "Something went wrong while loading settlements.";
+
+    }
+
+}
+
+
+// ==========================================
+// CLOSE POPUP WHEN CLICKING OUTSIDE
+// ==========================================
+
+document.getElementById("paymentModal")
+    .addEventListener("click", function(event) {
+
+        if (event.target === this) {
+
+            closePaymentModal();
+
+        }
+
+    });
+
+
+// ==========================================
+// START
+// ==========================================
+
+loadSettlement();
+
+</script>
+
+</body>
+
+</html>
